@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="wk_portal_assets_frontend" inherit_id="website.assets_frontend" name="Assets Frontend Review">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/dropship_portal/static/src/js/validate.js"></script>
+            <script type="text/javascript" src="/dropship_portal/static/src/js/validate_all.js"></script>
+            <script type="text/javascript" src="/dropship_portal/static/src/js/reject.js"></script>
+            <script type="text/javascript" src="/dropship_portal/static/src/js/reject_all.js"></script>
+        </xpath>
+    </template>
+
+    <!--template id="portal_my_home_menu_purchase" name="Portal layout : purchase menu entries" inherit_id="portal.portal_layout" priority="25">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'purchase' or purchase_order">
+                <a t-if="purchase_order" t-attf-href="/my/purchase?{{ keep_query() }}">Purchase Orders</a>
+            <t t-else="">Purchase Orders</t>
+            </li>
+            <li t-if="purchase_order">
+            <t t-esc="purchase_order.name"/>
+            </li>
+        </xpath>
+    </template-->
+
+    <!--template id="portal_my_home_purchase" name="Portal My Home : purchase entry" inherit_id="portal.portal_my_home" priority="25">
+        <xpath expr="//ul[hasclass('o_portal_docs')]" position="inside">
+            <li t-if="purchase_count" class="list-group-item">
+                <span class="badge" t-esc="purchase_count"/>
+                <a href="/my/purchase">Purchase Orders</a>
+            </li>
+        </xpath>
+    </template-->
+
+    <template id="portal_my_purchase_orders" name="Portal: My Purchase Orders">
+        <t t-call="portal.portal_layout">
+            <h3>Purchase Orders
+                <t t-call="portal.portal_searchbar"/>
+            </h3>
+            <div t-if="orders" class="panel panel-default">
+                <div class="table-responsive"><table class="table table-hover o_portal_my_doc_table">
+                        <thead>
+                            <tr class="active">
+                                <th>Purchase Orders #</th>
+                                <th>Order Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <t t-foreach="orders" t-as="order">
+                            <tr>
+                                <td>
+                                    <a t-attf-href="/my/purchase/#{order.id}?#{keep_query()}"><t t-esc="order.name"/></a>
+                                </td>
+                                <td><span t-field="order.date_order"/></td>
+                                <td><span t-field="order.amount_total" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/></td>
+                                <td><span t-field="order.state"/></td>
+                            </tr>
+                        </t>
+                    </table></div>
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_purchase_order" name="Portal: My Purchase Order">
+        <t t-call="portal.portal_layout">
+            <t t-set="purchase_order" t-value="order">
+            </t>
+            <div id="optional_placeholder">
+            </div>
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-6" t-if="order.state=='purchase' and order.dest_address_id" style="border:1px solid #888; padding:10px;">
+                        <strong>Ship to</strong><br/>
+                        <span t-field="order.dest_address_id.name"/><br/>
+                        <span t-field="order.dest_address_id.street"/> <span t-field="order.dest_address_id.street2"/><br/>
+                        <span t-field="order.dest_address_id.city"/>, <span t-field="order.dest_address_id.state_id.name"/> <span t-field="order.dest_address_id.zip"/><br/>
+                        <span t-field="order.dest_address_id.country_id.name"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6" style="border:1px solid #888; padding:10px;">
+                        <div style="width: 100%;">
+                            <strong>Expected ship date:</strong> <span t-esc="time.strftime('%Y-%m-%d',time.strptime(order.date_planned,'%Y-%m-%d %H:%M:%S'))"/>
+                        </div>
+                        <input type="hidden" name="order_id" id="orderId" t-att-value="int(order.id)"/>
+                        <div t-if="order.state=='sent'">
+							<button type="button" value="validate" id="wkvalidate_all"
+                                style="margin:10px;width: 194px;" class="col-sm-2">Confirm &amp; Accept Terms</button>
+							<button type="button" style="margin:10px; width: 222px;" class="col-sm-2"
+								data-toggle="modal"	data-target="#myModalHorizontal">Decline or Changes Needed
+							</button>
+							<div class="modal fade" id="myModalHorizontal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal"> <span class="sr-only">Close</span>
+										</button>
+										<h4 class="modal-title" id="myModalLabel">
+											Decline or Changes Needed
+										</h4>
+									</div>
+									<div class="modal-body">
+										<form class="form-horizontal" role="form">
+											<div class="form-group">
+                                                <label class="col-sm-4 control-label"
+                                                for="inputNote" >Additional Note</label>
+                                                <div class="col-sm-6">
+                                                    <textarea rows="3" cols="31" name="" id="inputNote" placeholder="Additional Note..."></textarea>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <input type="button" value="submit" id="wkreject_all"  class="btn btn-primary"/>
+                                    </div>
+                                </div>
+                            </div>
+							</div>
+                        </div>
+
+                                <style>
+                                    #wkvalidate_all {
+    color: #fff;
+    background-color: #2d8611;
+    background-image: -moz-linear-gradient(top,#2d8611,#216c0a);
+    background-image: -webkit-gradient(linear,0 0,0 100%,from(#2d8611),to(#216c0a));
+    background-image: -webkit-linear-gradient(top,#2d8611,#216c0a);
+    background-image: -o-linear-gradient(top,#2d8611,#216c0a);
+    background-image: linear-gradient(to bottom,#2d8611,#216c0a);
+    background-repeat: repeat-x;
+    -webkit-box-shadow: 0 1px 4px 0 rgba(0,0,0,.35);
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,.35);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+    border-color: rgba(0,0,0,0.01);
+    outline-offset: 2px;
+}
+#wkvalidate_all:hover, #wkvalidate_all:active, #wkvalidate_all:focus, #wkvalidate_all.active {
+    color: #fff;
+    background: #2d8611;
+}
+
+#wkreject_all {
+    color: #fff;
+    background-color: #420000;
+    background-image: -moz-linear-gradient(top,#800000,#420000);
+    background-image: -webkit-gradient(linear,0 0,0 100%,from(#800000),to(#420000));
+    background-image: -webkit-linear-gradient(top,#800000,#420000);
+    background-image: -o-linear-gradient(top,#800000,#420000);
+    background-image: linear-gradient(to bottom,#800000,#420000);
+    background-repeat: repeat-x;
+    -webkit-box-shadow: 0 1px 4px 0 rgba(0,0,0,.35);
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,.35);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+    border-color: rgba(0,0,0,0.01);
+    outline-offset: 2px;
+}
+#wkreject_all:hover, #wkreject_all:active, #wkreject_all:focus {
+    color: #fff;
+    background-color: #800000;
+}
+                                </style>
+                    </div>
+                </div>
+
+
+                <div class="row">
+
+                    <div class="panel-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <strong>Item #</strong>
+                                    </th>
+                                    <th>
+                                        <strong>VendorID #</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Product</strong>
+                                    </th>
+                                    <th>
+                                        <strong>QTY</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Price</strong>
+                                    </th>
+                                    <th>
+                                        <strong>Subtotal</strong>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <t t-foreach="order.order_line" t-as="ol">
+                                <tr>
+                                <div class="row purchases_vertical_align">
+                                    <td>
+                                        <span t-esc="ol.product_id.default_code"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="ol.product_id.code"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="ol.product_id.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="ol.product_qty"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="ol.price_unit" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                    </td>
+                                    <td>
+                                        <span t-field="ol.price_subtotal" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                                    </td>
+                                </div>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td colspan="6" style="text-align: right">
+                                    <strong>Total:</strong>
+                                    <strong><span t-field="order.amount_total" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/></strong>
+                                </td>
+                            </tr>
+                            </tbody>
+							<div t-if="order.state=='draft' and order.observ" style="margin:0px;" class="col-xs-6">
+								<strong><span t-field="order.observ"/></strong>
+							</div>
+                        </table>
+                    </div>
+                    <div style="margin:0;" class="col-xs-12" t-if="not order.dest_address_id and order.picking_type_id.warehouse_id">
+                        <span t-field="order.picking_type_id.warehouse_id.name"/>
+                        <div t-field="order.picking_type_id.warehouse_id.partner_id"
+                             t-options='{"widget": "contact", "fields": ["address", "phone"], "no_marker": True, "phone_icons": True}'/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- from portal layout -->
+
+    <template id="purchase_layout" name="Portal Layout">
+        <t t-call="portal.frontend_layout">
+            <!--div class="container mt16 o_portal">
+                    <div class="oe_structure">
+                            <div t-if="not no_breadcrumbs" class="row">
+                                    <div class="col-sm-12">
+                                            <ol class="breadcrumb o_portal_submenu">
+                                                    <li><a href="/my/home"><i class="fa fa-home"/></a></li>
+                                                    <li t-if="page_name == 'my_details'">Your Details</li>
+                                            </ol>
+                                    </div>
+                            </div>
+                    </div>
+            </div-->
+            <div id="wrap" class='o_portal_wrap'>
+                <div class="container mb64">
+                    <t t-if="my_details">
+                        <div class="row">
+                            <div t-attf-class="col-md-9 col-lg-8">
+                                <t t-raw="0"/>
+                            </div>
+                            <div id="o_my_sidebar" class="col-md-3 col-lg-offset-1 o_my_sidebar">
+                                <div class="o_my_contact" t-if="sales_user">
+                                    <t t-call="portal.portal_contact"/>
+                                </div>
+                                <div class="o_portal_my_details">
+                                    <h3 class="page-header">Your Details <a href="/my/account" class="btn btn-default btn-xs">Change</a></h3>
+                                    <div t-field="user_id.partner_id" t-options='{"widget": "contact", "fields": ["email", "phone", "address", "name"]}'/>
+                                </div>
+                                <div class="o_my_archives" t-if="archive_groups">
+                                    <t t-call="portal.portal_archive_groups"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <t t-raw="0"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_order_form_inherit_sale_dropship" model="ir.ui.view">
+            <field name="name">sale.order.form.sale.dropship</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_quotation_send']" position="replace">
+                     <button name="action_quotation_send" string="Email" type="object" states="draft" class="oe_highlight"/>
+                </xpath>
+                <xpath expr="//button[@name='action_quotation_send']" position="replace">
+                     <button name="action_quotation_send" string="Email" type="object" states="draft" class="oe_highlight"/>
+                </xpath>
+                <xpath expr="//button[@name='action_quotation_send'][last()]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='print_quotation']" position="replace">
+                    <button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight"/>
+                </xpath>
+                <xpath expr="//button[@name='action_confirm']" position="replace">
+                    <button name="action_confirm" id="action_confirm" string="Confirm Sale" class="oe_highlight" type="object"
+                        attrs="{'invisible': [('state', 'not in', ['sent'])]}"/>
+                </xpath>
+                <xpath expr="//button[@name='action_confirm'][last()]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//page/field[@name='order_line']/form/group/group/field[@name='tax_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form/group/group/field[@name='price_unit']" position="before">
+                    <field name="is_route" invisible="1"/>
+                    <field name="vendor_id" domain="[('product_tmpl_id','=', product_id)]"/>
+                    <field name="shipping_date"/> 
+                </xpath>
+                <!-- tree -->
+                <xpath expr="//tree" position="replace">
+                    <tree string="Sales Order Lines" editable="bottom"
+                        decoration-bf="item_status=='FD'"
+                        decoration-danger="item_status=='QO'"
+                        decoration-warning="item_status=='CM' or item_status=='ND'"
+                        decoration-primary="item_status=='PI' or item_status=='PS' or item_status=='OD'"
+                        decoration-info="item_status=='SH'"
+                        decoration-success="item_status=='FD'"
+                        decoration-muted="item_status=='HS' or item_status=='BO' or item_status=='PB'"
+                    >   
+                        <field name="sequence" widget="handle"/>
+                        <field name="product_updatable" invisible="1"/>
+                        <field name="product_id"
+                            attrs="{'readonly': [('product_updatable', '=', False)]}"
+                            force_save="1"
+                            context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                        />
+                        <field name="layout_category_id" groups="sale.group_sale_layout"/>
+                        <field name="name" invisible="1" />
+                        <field name="is_route" invisible="1"/>
+                        <field name="route_id"/>
+               	        <field name="assign_vendor" invisible="1"/>
+               	        <field name="vendor_id" domain="[('product_tmpl_id','=', product_id)]"/>
+                        <field name="customer_lead" string="Lead time"/>
+                        <field name="shipping_date"/> 
+                        <field name="init_qty"/> 
+                        <field name="product_uom_qty"
+                            string="Assigned"
+                            context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                        />
+                        <field name="product_uom" invisible="1"/>
+                        <field name="qty_delivered"/>
+                        <field name="qty_to_invoice"/>
+                        <field name="po_order"/>
+                        <field name="po_line"/>
+                        <field name="item_status"/>
+                        <field name="invoice_status"
+                            attrs="{'column_invisible': [('parent.state', 'not in', ['done'])]}"/>
+                        <field name="qty_delivered_updateable" invisible="1"/>
+                        <field name="state" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                    </tree>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+

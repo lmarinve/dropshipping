@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+			<xpath expr="//button[@name='action_rfq_send']" position="replace">
+                <button name="action_po_send" string="Email PO" type="object" states="draft" context="{'send_rfq':True}" class="oe_highlight"/>
+			</xpath>
+			<xpath expr="//button[@name='action_rfq_send']" position="replace">
+                <button name="action_po_send" string="Email PO" type="object" states="sent" context="{'send_rfq':True}"/>
+			</xpath>
+			<xpath expr="//button[@name='action_rfq_send']" position="replace">
+                <button name="action_po_send" string="Email PO" type="object" states="purchase" context="{'send_rfq':True}" attrs="{'invisible': []}"/>
+			</xpath>
+			<xpath expr="//button[@name='print_quotation']" position="replace">
+                <button name="print_quotation" string="Print PO" type="object" states="draft" class="oe_highlight"/>
+			</xpath>
+			<xpath expr="//button[@name='print_quotation'][last()]" position="replace">
+                <button name="print_quotation" string="Print PO" type="object" states="sent"/>
+			</xpath>
+
+            <field name="partner_id" position="after">
+                <field name="user_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="action_partner_vendor_registered" model="ir.actions.act_window">
+        <field name="name">Users</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+        <field name="domain">[('user_vendor', '=', 1)]</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_user_vendor': 1}</field>
+        <field name="filter" eval="True"/>
+    </record>
+
+	<menuitem name="Portal Users" id="portal_vendor_reg" action="action_partner_vendor_registered" sequence="15"
+        parent="purchase.menu_procurement_management" />
+
+</odoo>
+
+
